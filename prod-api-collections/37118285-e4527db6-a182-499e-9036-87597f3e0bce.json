@@ -1,0 +1,2935 @@
+{
+	"info": {
+		"_postman_id": "37118285-e4527db6-a182-499e-9036-87597f3e0bce",
+		"name": "LV",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "lv_signup",
+			"item": [
+				{
+					"name": "highSchoolLogin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ce845483-59c2-4aad-bd8c-82a631e8f3dc",
+								"exec": [
+									"let response = pm.response.json();",
+									"",
+									"let token = response.data?.highSchoolLogin?.access_token;",
+									"",
+									"if (token) {",
+									"    pm.collectionVariables.set(\"paLoginToken\", token);",
+									"    console.log(\"✅ paLoginToken saved:\", token);",
+									"} else {",
+									"    console.error(\"⚠️ Token not found in response\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "0662db30-ea53-4bbe-b070-e9b715ce90f3",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "37118285-a6aa6f83-e979-44f8-9acf-6ebb2fc0fea3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvSTGSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation highSchoolLogin($email: String, $password: String) {\n  highSchoolLogin(email: $email, password: $password) {\n    access_token\n    expires_at\n    email_verified_at\n    user_id\n    user {\n      full_name\n      role\n      profile_picture {\n        url\n        __typename\n      }\n      admin {\n        role\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}",
+								"variables": "{\n  \"email\": \"ahmad.yahea+hs@educatly.com\",\n  \"password\": \"Educatly1234@\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "inviteStudentsByEmail",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e39ef836-392c-4c74-a59d-5bd4fa208d5f",
+								"exec": [
+									"// Generate a random number to append to the email",
+									"const randomValue = Math.floor(Math.random() * 100000);",
+									"const uniqueEmail = `ahmad.yahea+${randomValue}@educatly.com`;",
+									"",
+									"// Save unique email",
+									"pm.environment.set(\"userEmail\", uniqueEmail);",
+									"",
+									"// Function to generate a random phone number",
+									"function generateRandomPhoneNumber() {",
+									"    const prefixes = [\"+2010\", \"+2011\", \"+2012\", \"+2015\"];",
+									"    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];",
+									"    let number = '';",
+									"    for (let i = 0; i < 8; i++) {",
+									"        number += Math.floor(Math.random() * 10);",
+									"    }",
+									"    return prefix + number;",
+									"}",
+									"",
+									"// Save random phone number",
+									"const randomPhoneNumber = generateRandomPhoneNumber();",
+									"pm.environment.set(\"userPhoneNumber\", randomPhoneNumber);",
+									"",
+									"// Load faker and generate first/last name",
+									"pm.sendRequest('https://cdn.jsdelivr.net/npm/faker@5.5.3/dist/faker.min.js', (err, res) => {",
+									"  if (!err) {",
+									"// Generate random first and last names using Postman's built-in generator",
+									"var first_name = pm.variables.replaceIn(\"{{$randomFirstName}}\");",
+									"var last_name = pm.variables.replaceIn(\"{{$randomLastName}}\");",
+									"",
+									"// Set them as environment variables so each iteration gets new values",
+									"pm.environment.set(\"first_name\", first_name);",
+									"pm.environment.set(\"last_name\", last_name);",
+									"",
+									"// Optional: Log them to console to verify per iteration",
+									"console.log(\"Generated:\", first_name, last_name);",
+									"",
+									"  }",
+									"});",
+									"",
+									"// Generate FCM token",
+									"const fcmToken = 'fcm_' + Math.random().toString(36).substring(2, 15);",
+									"pm.environment.set(\"fcmToken\", fcmToken);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "4648f3d5-da6e-47ff-8a8d-7f29fcbd9c19",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "37118285-70078b91-637f-4556-908a-1937af2ced5b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{paLoginToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation inviteStudentsByEmail($students: [HighSchoolStudentInvitationInput!]!) {\n  inviteStudentsByEmail(students: $students)\n}",
+								"variables": "{\n  \"students\": [\n    {\n      \"firstName\": \"{{first_name}}\",\n      \"lastName\": \"{{last_name}}\",\n      \"email\": \"{{userEmail}}\",\n      \"phone\": \"+20\",\n      \"subscribe\": true\n    }\n  ]\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "4cd76a96-9164-4d1a-9c20-78f9890f0edf",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "def9ee73-526d-45f1-bb16-88b76fa30d9e",
+								"exec": [
+									"var jsonData;",
+									"try {",
+									"    jsonData = pm.response.json();",
+									"} catch (e) {",
+									"    console.error(\"❌ Response is not valid JSON:\", e);",
+									"}",
+									"",
+									"if (jsonData?.data?.educatlyAppSignUp) {",
+									"    const userId = jsonData.data.educatlyAppSignUp.currentUser?.id ",
+									"        || jsonData.data.educatlyAppSignUp.user_id;",
+									"    pm.environment.set(\"invitationSignupUserId\", userId);",
+									"    console.log(\"✅ Prod invitationSignupUserId set to:\", userId);",
+									"",
+									"    const token = jsonData.data.educatlyAppSignUp.access_token;",
+									"    pm.environment.set(\"invitationSignupToken\", token);",
+									"    console.log(\"✅ Prod invitationSignupToken set to:\", token);",
+									"",
+									"    const email = jsonData.data.educatlyAppSignUp.currentUser?.email ",
+									"        || jsonData.data.educatlyAppSignUp.email;",
+									"    pm.environment.set(\"userEmail\", email);",
+									"    console.log(\"✅ Prod userEmail set to:\", email);",
+									"} else {",
+									"    console.error(\"❌ Could not find educatlyAppSignUp in response\", jsonData);",
+									"}",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "37118285-18298324-e950-45ec-b5a6-851376bb1ef1",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation educatlyAppSignUp(\n  $email: String!\n  $password: String!\n  $phoneNumber: String!,\n  $fcmRegistrationToken: String!\n) {\n  educatlyAppSignUp(\n    email: $email\n    password: $password\n    phoneNumber: $phoneNumber\n    fcmRegistrationToken: $fcmRegistrationToken\n  ) {\n    access_token\n    expires_at\n    user_id\n    email_verified_at\n    currentUser {\n      id\n      email\n      phone_number\n    }\n  }\n}",
+								"variables": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"Educatly1234@\",\n  \"phoneNumber\": \"{{userPhoneNumber}}\",\n  \"fcmRegistrationToken\": \"hXevOGtc0UDiHjGLwbhsz:APA91bGSoAgkKc7uQST0vlgsiS_vruoewPeJxQ5vzRMsBtzUrXZP4F_LvXcaMr_mgEqSCZH_RnJycBK2k_oMEiejZXTjVe3ilmWTun_LlkQtz-pK7l-tlgs\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_signup_update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"",
+									"if (jsonData.data && jsonData.data.userUpdate && jsonData.data.userUpdate.id) {",
+									"    let userId = jsonData.data.userUpdate.id;",
+									"    pm.collectionVariables.set(\"user_id\", userId);",
+									"    console.log(\"Collection variable user_id set to:\", userId);",
+									"} else {",
+									"    console.error(\"userUpdate.id not found in response\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"id": "13f674ef-e966-471b-b684-cf3f3cd88dda"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [],
+								"type": "text/javascript",
+								"id": "1a25c8b3-75fc-4204-9b4f-d8f6a5f60946"
+							}
+						}
+					],
+					"id": "37118285-011c168d-5f66-48ad-9c55-6ad027595734",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{invitationSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation signupUserUpdate(\n  $first_name: String\n  $last_name: String\n) {\n  userUpdate(\n    user: { first_name: $first_name, last_name: $last_name }\n  ) {\n    id\n    first_name\n    last_name\n  }\n}",
+								"variables": "{\n    \"first_name\": \"{{first_name}}\",\n    \"last_name\": \"{{last_name}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HighSchoolQualificationUpdateOrCreate",
+					"id": "37118285-60b7d8db-727a-4da4-a681-58787b34e55f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{invitationSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation HighSchoolQualificationUpdateOrCreate(\n  $high_school_id: Int\n  $high_school_name: String!\n  $grade_id: Int!\n  $certification_type_id: Int!\n  $from_year: Int!\n  $graduation_year: Int!\n  $transcripts_file: [AttachmentInputType]\n) {\n  highSchoolQualificationUpdateOrCreate(\n    eq: {\n      high_school_id: $high_school_id\n      high_school_name: $high_school_name\n      grade_id: $grade_id\n      certification_type_id: $certification_type_id\n      from_year: $from_year\n      graduation_year: $graduation_year\n      transcripts_file: $transcripts_file\n    }\n  ) {\n    id\n    high_school_name\n    high_school {\n      id\n      name\n    }\n    from_year\n    graduation_year\n    grade {\n      id\n      name\n    }\n    certification_type {\n      id\n      name\n    }\n    country {\n      id\n      name\n    }\n  }\n}\n",
+								"variables": "{\n    \"high_school_id\": 7,\n   \"high_school_name\": \"Kazeako\",\n   \"grade_id\": 4990,\n   \"certification_type_id\": 4972,\n   \"from_year\": 2020,\n   \"graduation_year\": 2021,\n   \"transcripts_file\": null\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "userGet",
+					"id": "37118285-6309bb26-87a7-4c0c-9121-255c657692a9",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query getUser($id: Int!) {\n  userGet(id: $id){\n    email\n    userSubscriptions{\n        name,\n        id\n    }\n    student_manager\n    {\n        name\n        id\n    }\n    student_high_school{\n        id\n        name\n    }\n    name\n    first_name\n    last_name\n    headline\n    about_me\n    myRole\n        high_school_qualification {\n      id\n      high_school_name\n      from_year\n      graduation_year\n    }\n    # # city {\n    # #   id\n    # #   name\n    # #   country {\n    # #     id\n    # #     name\n    # #     flag\n    # #     nameWithFlag\n    # #   }\n    # # }\n    # nationalities {\n    #   id\n    #   name\n    #   nameWithFlag\n    #   flag\n    # }\n    # user_languages {\n    #   id\n    #   proficiency\n    #   language {\n    #     id\n    #     name\n    #   }\n    # }\n    # work_experiences {\n    #   nodes {\n    #     id\n    #     organisation_name\n    #     currently_working_here\n    #     role_name\n    #     start_date\n    #     end_date\n    #     years_of_experience\n    #     type_of_experience {\n    #       id\n    #       name\n    #     }\n    #     competencies {\n    #       id\n    #       name\n    #     }\n    #   }\n    # }\n    # certifications {\n    #   nodes {\n    #     id\n    #     title\n    #     date_awarded\n    #   }\n    # }\n    # publications {\n    #   nodes {\n    #     id\n    #     title\n    #   }\n    # }\n    # courses {\n    #   nodes {\n    #     id\n    #     course_name\n    #     date\n    #   }\n    # }\n    # awards {\n    #   nodes {\n    #     id\n    #     title\n    #     issued_by\n    #     description\n    #     date\n    #   }\n    # }\n    # admission_tests {\n    #   nodes {\n    #     test_name\n    #   }\n    # }\n    # latest_qualification {\n    #   id\n    #   from_year\n    #   to_year\n    #   educational_institution {\n    #     id\n    #     name\n    #   }\n    #   level {\n    #     id\n    #     name\n    #   }\n    #   majors {\n    #     id\n    #     name\n    #   }\n    # }\n    # profile_picture {\n    #   id\n    #   filename\n    #   url\n    #   s3_url\n    # }\n    # cover_picture {\n    #   id\n    #   filename\n    #   s3_url\n    # }\n  }\n}",
+								"variables": "{\n  \"id\": {{user_id}}\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response body",
+									"let jsonData = pm.response.json();",
+									"",
+									"// Navigate the nested structure to get the access token",
+									"let accessToken = jsonData.data?.userLogin?.access_token;",
+									"",
+									"if (accessToken) {",
+									"    // Save to collection variable",
+									"    pm.environment.set(\"lvAccessToken\", accessToken);",
+									"    console.log(\"✅ lvAccessToken saved:\", accessToken);",
+									"} else {",
+									"    console.error(\"❌ access_token not found in response.\");",
+									"    pm.test(\"Access token should exist\", function () {",
+									"        pm.expect(accessToken, \"Expected access_token to be present\").to.not.be.undefined;",
+									"    });",
+									"}",
+									"",
+									"// save user_id as a collection variable",
+									"pm.collectionVariables.set(\"user_id\", jsonData.data.userLogin.user_id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "acb30e52-1aa5-4ec6-8263-2cdf1cc2f0a1"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "8140c558-89c9-4b21-804d-904ff03e1695"
+							}
+						}
+					],
+					"id": "37118285-2caa30a1-f79b-4a56-9965-bf9b76f63d00",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvSTGSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation loginMutation($email: String, $password: String) {\n  userLogin(email: $email, password: $password) {\n    access_token\n    expires_at\n    email_verified_at\n    user_id\n    __typename\n  }\n}",
+								"variables": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"Educatly1234@\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "37118285-29a590bb-9313-4798-837a-23a80c96941b"
+		},
+		{
+			"name": "checkpoint",
+			"item": [
+				{
+					"name": "lv_login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response body",
+									"let jsonData = pm.response.json();",
+									"",
+									"// Navigate the nested structure to get the access token",
+									"let accessToken = jsonData.data?.userLogin?.access_token;",
+									"",
+									"if (accessToken) {",
+									"    // Save to collection variable",
+									"    pm.environment.set(\"lvAccessToken\", accessToken);",
+									"    console.log(\"✅ lvAccessToken saved:\", accessToken);",
+									"} else {",
+									"    console.error(\"❌ access_token not found in response.\");",
+									"    pm.test(\"Access token should exist\", function () {",
+									"        pm.expect(accessToken, \"Expected access_token to be present\").to.not.be.undefined;",
+									"    });",
+									"}",
+									"",
+									"// save user_id as a collection variable",
+									"pm.collectionVariables.set(\"user_id\", jsonData.data.userLogin.user_id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "7b025862-efe5-4a8d-af14-2124fd7b921f"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "fe07da49-a415-4102-a30f-44b8de9f31c0"
+							}
+						}
+					],
+					"id": "37118285-fe25a202-a8d2-43e5-8eef-b3cb13037d48",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation loginMutation($email: String, $password: String) {\n  userLogin(email: $email, password: $password) {\n    access_token\n    expires_at\n    email_verified_at\n    user_id\n    __typename\n  }\n}",
+								"variables": "{\n  \"email\": \"ahmad.yahea+4515@educatly.com\",\n  \"password\": \"Educatly1234@\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "checkpoint",
+					"id": "37118285-3ca3c00e-128b-4b9e-96f2-5e7b1b2ab0fa",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "8879009caf8c68d2b0f8b75a24d7b802",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\n  userGet(id: 125573 ){\n    name\n    email\n    total_xp\n     journey_checkpoint {\n      id\n      module_number \n      section_number \n      item_piece_number\n      item_number \n      question_number \n    }\n    userSubscriptions{\n        id\n        status\n        auto_renew\n        amount_in_currency_unit\n        b2b\n        b2c\n    }\n    current_plan{\n        name\n        product_name\n    }\n    active_subscription{\n        name\n        start_date\n        end_date\n    }\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "subscriptoin_status",
+					"id": "37118285-94a30659-c7aa-4e92-bc7e-f7e1fd78e508",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "0664e3fc30413ee51fa3d4de8d64c6e4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation EditUserSubscription($editUserSubscriptionId: Int!, $userSubscription: UserSubscriptionInput!) {\n  editUserSubscription(id: $editUserSubscriptionId, user_subscription: $userSubscription) {\n    id\n    name\n    user_id\n  }\n}",
+								"variables": "{\n    \n    \"editUserSubscriptionId\": 70,\n    \"userSubscription\": \n    {\n        \"status\": \"expired\"\n    }\n}\n\n//  statuses :{active, cancelled, expired, suspended, past_due}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "37118285-22e4b231-b1e3-42b8-a802-f52fb4538ba8"
+		},
+		{
+			"name": "JTP",
+			"item": [
+				{
+					"name": "refresh",
+					"id": "37118285-6cde7445-2ad0-40da-a5f0-b90b42184311",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\n  refreshRecommendations(userId: {{user_id}})\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "JTP",
+					"id": "37118285-89c73638-1048-455f-94d4-9f4d8997985b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{userGet(id: {{user_id}}) {\n    name\n    email\n    recommendedContentCount\n    ikigai {\n            id\n            ikigai_intersection\n            what_the_world_needs\n            what_you_are_good_at\n            what_you_can_be_paid_for\n            what_you_love\n            }\n    recommendedCareers(page: 1, per_page: 100) {\n        data {\n        id\n        name\n        icon\n        description\n        }\n        paging {\n        current_page\n        total_items\n        total_pages\n        }\n    }\n    recommendedSmartCareers(page: 1, per_page: 100) {\n        data {\n        id\n        score\n        icon\n        description\n        }\n        paging {\n        current_page\n        total_items\n        total_pages\n        }\n    }\n    recommendedPassions(page: 1, per_page: 100) {\n        data {\n        id\n        name\n        description\n        icon\n        matchPercentage\n        }\n        paging {\n        current_page\n        total_items\n        total_pages\n        }\n    }\n    recommendedEducationalMajors(page: 1, per_page: 100) {\n        data {\n        id\n        name\n        }\n        paging {\n        current_page\n        total_items\n        total_pages\n        }\n    }\n    growthMap {\n        icon\n        itemHits\n        itemIcon\n        itemName\n        percentage\n        type\n  }\n    user_building_blocks {\n            lv_tag {\n                id\n                name\n                tag_type\n            }\n        }\n}\n}\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "37118285-e47afa2b-edb3-4715-a20a-9b4dc1e08353"
+		},
+		{
+			"name": "cocktail",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response body",
+									"let jsonData = pm.response.json();",
+									"",
+									"// Navigate the nested structure to get the access token",
+									"let accessToken = jsonData.data?.userLogin?.access_token;",
+									"",
+									"if (accessToken) {",
+									"    // Save to collection variable",
+									"    pm.environment.set(\"lvAccessToken\", accessToken);",
+									"    console.log(\"✅ lvAccessToken saved:\", accessToken);",
+									"} else {",
+									"    console.error(\"❌ access_token not found in response.\");",
+									"    pm.test(\"Access token should exist\", function () {",
+									"        pm.expect(accessToken, \"Expected access_token to be present\").to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"id": "ea315147-47fb-4635-828e-8f4cc7522d9d"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"id": "a9605598-ad25-477b-8f54-c6aa5fc81b38"
+							}
+						}
+					],
+					"id": "37118285-29b4fc12-2f61-4f05-9709-b5701b41f0a7",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation loginMutation($email: String, $password: String) {\\n  userLogin(email: $email, password: $password) {\\n    access_token\\n    expires_at\\n    email_verified_at\\n    user_id\\n    __typename\\n  }\\n}\",\n  \"variables\": {\n    \"email\": \"ahmad.yahea+yarab2@educatly.com\",\n    \"password\": \"Educatly1234@\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a random number to append to the email",
+									"const randomValue = Math.floor(Math.random() * 100000); // Change the range if needed",
+									"const uniqueEmail = `ahmad.yahea+${randomValue}@educatly.com`;",
+									"",
+									"// Set the unique email variable",
+									"pm.environment.set(\"userEmail\", uniqueEmail);",
+									"",
+									"// Function to generate a random phone number",
+									"function generateRandomPhoneNumber() {",
+									"    // Define valid prefixes",
+									"    const prefixes = [\"010\", \"011\", \"012\", \"015\"];",
+									"    // Select a random prefix from the list",
+									"    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];",
+									"    // Generate the remaining 8 digits",
+									"    let number = '';",
+									"    for (let i = 0; i < 8; i++) {",
+									"        number += Math.floor(Math.random() * 10); // Random digit from 0-9",
+									"    }",
+									"    return prefix + number; // Combine prefix and remaining digits",
+									"}",
+									"",
+									"// Set the random phone number variable",
+									"const randomPhoneNumber = generateRandomPhoneNumber();",
+									"pm.environment.set(\"userPhoneNumber\", randomPhoneNumber);",
+									"",
+									"eval(pm.sendRequest('https://cdn.jsdelivr.net/npm/faker@5.5.3/dist/faker.min.js', (err, res) => {",
+									"  if (!err) {",
+									"    eval(res.text());",
+									"    const userFirstName = faker.name.userFirstName();",
+									"    const userLastName = faker.name.userLastName();",
+									"  }",
+									"}));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"id": "06fdfbe3-6ef3-4343-b894-17feddddeb07"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"id": "81205f71-4981-4dbe-9332-93d2240afee8"
+							}
+						}
+					],
+					"id": "37118285-69a66893-5700-4a9a-b330-d85b0665c455",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation educatlyAppSignUp {\n  educatlyAppSignUp(email: \"ahmad.yahea+signupLV@educatly.com\", password: \"123456789\", phoneNumber: \"{{userPhoneNumber}}\", fcmRegistrationToken: \"zdafs\") {\n    access_token\n    currentUser {\n      id\n      phone_number\n      city {\n        id\n        name\n        country {\n          id\n          name\n          nameWithFlag\n        }\n      }\n      highSchool { \n        id      # if present, it should be used to preselect high school qualification\n        name\n      }\n      hasFilledPostRegistrationSurvey    # if post registration survey is filled\n      canAccessEducatlyApp               # if false, trap user into \"coming soon\" screen\n      reasonForNotAccessingEducatlyApp   # [text] reason why user is not allowed to access app\n      missingFieldsToCompleteEducatlyAppSignup # list of missing fields to complete sign up:\n                    # possible types -> First name, Last name, Location, Phone, Qualification\n    }\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response body",
+									"let jsonData = pm.response.json();",
+									"",
+									"// Navigate the nested structure to get the access token",
+									"let accessToken = jsonData.data?.userLogin?.access_token;",
+									"",
+									"if (accessToken) {",
+									"    // Save to collection variable",
+									"    pm.collectionVariables.set(\"lvAccessToken\", accessToken);",
+									"    console.log(\"✅ lvAccessToken saved:\", accessToken);",
+									"} else {",
+									"    console.error(\"❌ access_token not found in response.\");",
+									"    pm.test(\"Access token should exist\", function () {",
+									"        pm.expect(accessToken, \"Expected access_token to be present\").to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"id": "881882b5-4098-4729-9365-a137f897e7dc"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"id": "cefd827e-df48-4776-8540-1e4da33c0a25"
+							}
+						}
+					],
+					"id": "37118285-5114e94b-842d-4f22-8f7a-ae0fab36cc18",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation loginMutation($email: String, $password: String) {\\n  userLogin(email: $email, password: $password) {\\n    access_token\\n    expires_at\\n    email_verified_at\\n    user_id\\n    __typename\\n  }\\n}\",\n  \"variables\": {\n    \"email\": \"ahmad.yahea+lv@educatly.com\",\n    \"password\": \"123456789\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"id": "37118285-90f16be8-2083-435e-9205-7fe650adfa07",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\n  addJourneyProgressOnItem(\n   journeyProgress: {\n      key: \"personality-assessment-feedback\",\n      item_type: ARTICLE_CONTENT\n    }\n  ) {\n    id\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "key_profile",
+					"id": "37118285-c2fbff98-f5b1-4d4d-9a2a-9e32e3b1e7da",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query getProfile($id: Int!) {\n  profileGet(id: $id) {\n    id\n    name\n    about\n    industries {\n      nodes {\n        id\n        name\n      }\n    }\n    advice\n    defaultCover\n    profileImageUrl\n    profileLink\n    profilePicture {\n      url\n    }\n    headline\n    careerJourney {\n      careerObstacles\n      lessonsLearned\n      keyDecisions\n    }\n    skills {\n      id\n      name\n    }\n    personality {\n      id\n      name\n    }\n    behavioralTraits {\n      id\n      name\n    }\n    contributions {\n      description\n      year\n    }\n    certificates {\n      title\n      institution\n      completionYear\n    }\n    degrees {\n      title\n      institution\n      completionYear\n    }\n    courses {\n      title\n      year\n    }\n    lifeStages {\n      description\n      startYear\n      endYear\n      tag\n      title\n    }\n    journeyHighlights {\n      description\n    }\n    relatedMedia {\n      description\n      duration\n      link\n      title\n      type\n      thumbnail\n    }\n    careers\n    passions\n  }\n}",
+								"variables": "{\n    \"id\": 55\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sdkjlflkads",
+					"id": "37118285-8b06a1f4-e6d7-4178-b852-5185f54710f2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\n  addJourneyProgressOnItem(\n    journeyProgress: {\n      key: \"identity-blueprint-beliefs\",\n      item_type: ARTICLE_CONTENT\n    }\n  ) {\n    id\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "userGet",
+					"id": "37118285-1727ad65-116f-4344-a3ab-85f673afbd93",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{userGet(id: {{user_id}}) {\n    id\n    invitationStatus\n    student_manager\n    {\n        name\n        id\n    }\n    name\n    headline\n    about_me\n    myRole\n    city {\n      id\n      name\n      country {\n        id\n        name\n        flag\n        nameWithFlag\n      }\n    }\n    nationalities {\n      id\n      name\n      nameWithFlag\n      flag\n    }\n    user_languages {\n      id\n      proficiency\n      language {\n        id\n        name\n      }\n    }\n    work_experiences {\n      nodes {\n        id\n        organisation_name\n        currently_working_here\n        role_name\n        start_date\n        end_date\n        years_of_experience\n        type_of_experience {\n          id\n          name\n        }\n        competencies {\n          id\n          name\n        }\n      }\n    }\n    certifications {\n      nodes {\n        id\n        title\n        date_awarded\n      }\n    }\n    publications {\n      nodes {\n        id\n        title\n      }\n    }\n    courses {\n      nodes {\n        id\n        course_name\n        date\n      }\n    }\n    awards {\n      nodes {\n        id\n        title\n        issued_by\n        description\n        date\n      }\n    }\n    admission_tests {\n      nodes {\n        test_name\n      }\n    }\n    high_school_qualification {\n      id\n      high_school_name\n      from_year\n      graduation_year\n    }\n    latest_qualification {\n      id\n      from_year\n      to_year\n      educational_institution {\n        id\n        name\n      }\n      level {\n        id\n        name\n      }\n      majors {\n        id\n        name\n      }\n    }\n    profile_picture {\n      id\n      filename\n      url\n      s3_url\n    }\n    cover_picture {\n      id\n      filename\n      s3_url\n    }\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fetchOrAssignSsm",
+					"id": "37118285-c349af3f-bf83-47ec-8d51-eea385c7d884",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation fetchOrAssignSsm {\n    fetchOrAssignSsm {\n        id\n        user \n        {\n            id\n        }\n        calendarFreeSlots\n        {\n            startTime\n            endTime\n        }\n        calendarBusySlots\n        {\n            startTime\n            endTime\n        } \n    }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "summary_identity",
+					"id": "37118285-b1b70a3b-16d7-4292-8966-8f86dd8f4a3a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query LvEvents {\\n  lv_events(user_id: 15, page: 1, per_page: 3) {\\n    data {\\n      id\\n      name\\n      description\\n      start_time\\n      end_time\\n      location\\n      created_at\\n      updated_at\\n      status\\n      address\\n      is_online\\n      streaming_url\\n      organizer_name\\n      organizer_summary\\n      host_type\\n      seats_limit_count\\n      reserved_seats_count\\n      available_seats\\n      comments_count\\n      image\\n    }\\n  }\\n}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "personality_in_action",
+					"id": "37118285-382a2696-ded8-444d-9d9c-643b434fada0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation SendQuestionAnswer{\n  addJourneyProgressOnQuestion(\n    journeyProgress: {\n      key: \"personality-in-action-level-1\",\n      item_type: MULTIPLE_MCQ\n      question_number: 9\n      option_numbers :[1,2]\n    \n    }\n  ) {\n    id\n    xp_earned\n    submission{\n        ...on JourneyQuestionOptionType{\n            id\n            feedback\n            title\n        }\n    }\n  }\n  \n\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reflection",
+					"id": "37118285-8edb184c-4965-413c-a8ea-22974d532c82",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mu{addJourneyProgressOnReflection{\n JournalType\nJourneyQuestionAnswerType\nJourneyQuestionOptionType   \n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "events",
+					"id": "37118285-2e45a7cf-30a6-435e-a4df-7587c6c2e879",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"q\": \"\",\n  \"limit\": 10,\n  \"offset\": 0,\n  \"attributesToRetrieve\": [\n    \"name\",\n    \"id\",\n    \"description\",\n    \"pathways\",\n    \"salary_range\",\n    \"is_online\",\n    \"cluster\",\n    \"passions\",\n    \"emerging_skills\",\n    \"core_skills\",\n    \"successful_profiles\",\n    \"industries\",\n    \"start_date\",\n    \"market_trends\",\n    \"bookmarks_counts\",\n    \"monthly_views\",\n    \"total_views\",\n    \"country\",\n    \"city\",\n    \"image_url\",\n    \"event_type\",\n    \"status\"\n  ],\n  \"sort\": [\"created_at:desc\" ],\n  \"filter\": \"(name = \\\"Accounting\\\") AND (is_online = \\\"false\\\")\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/api/v1/events/299",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"299"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "events_search",
+					"id": "37118285-c9eae6da-2de5-4e25-90cd-09eacce15a44",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ms}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{ms}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"q\": \"\",\n  \"limit\": 10,\n  \"offset\": 0,\n  \"attributesToRetrieve\": [\n    \"name\",\n    \"id\",\n    \"description\",\n    \"pathways\",\n    \"salary_range\",\n    \"is_online\",\n    \"cluster\",\n    \"passions\",\n    \"emerging_skills\",\n    \"core_skills\",\n    \"successful_profiles\",\n    \"industries\",\n    \"start_date\",\n    \"market_trends\",\n    \"bookmarks_counts\",\n    \"monthly_views\",\n    \"total_views\",\n    \"country\",\n    \"city\",\n    \"image_url\",\n    \"event_type\",\n    \"status\"\n  ],\n  \"sort\": [\"created_at:desc\" ],\n  \"filter\": \"(industries = \\\"Accounting\\\") AND (is_online = \\\"false\\\")\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://ms.dev.educatly.com/",
+							"protocol": "https",
+							"host": [
+								"ms",
+								"dev",
+								"educatly",
+								"com"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "event_facet_search",
+					"id": "37118285-d6ce1c8f-394d-4fae-9bce-363722dd92d8",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ms}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"facetName\": \"event_type\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://ms.dev.educatly.com/Event/facet-search",
+							"protocol": "https",
+							"host": [
+								"ms",
+								"dev",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"Event",
+								"facet-search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addJourneyProgressOnPercentage",
+					"id": "37118285-340ec3bd-25f7-46a7-9ddd-3c7af195bf16",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\n  addJourneyProgressOnPercentage(\n    journeyProgress: {\n      key: \"what-shapes-your-identity-percentage\",\n      item_type: PERCENTAGE\n      question_number: 3,\n\t\t\tpercentage_number: 10\n    }\n  ) {\n    id\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addJourneyProgressOnItem",
+					"id": "37118285-416e3206-1bab-463b-9a68-03328513a603",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\n  addJourneyProgressOnItem(\n    journeyProgress: {\n      key: \"what-shapes-your-identity-article\",\n      item_type: ARTICLE_CONTENT\n    }\n  ) {\n    id\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "userJourneyProgresses",
+					"id": "37118285-16ed53f9-4bd0-4cfa-b429-b20e591a1297",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "  query {\n    userJourneyProgresses(key: \"what-shapes-your-identity-percentage\") {\n      id\n      other_text\n      percentage_number\n      submission {\n        __typename\n        ... on JourneyQuestionOptionType {\n          id\n          title\n          option_number\n          is_other_option\n        }\n        ... on JournalType {\n          id\n          # other journal fields\n        }\n      }\n      submitted_on {\n        __typename\n        ... on JourneyQuestionType {\n          id\n          title\n          question_number\n        }\n        ... on JourneyItemType {\n          id\n\n          # other journal fields\n        }\n      }\n    }\n  }",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SendCustomization",
+					"id": "37118285-cbfc4881-f21b-49eb-9a0f-8b19f43be60b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "e940facfe04ab0a5933b9899fe869056",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation SendCustomization {\n  addJourneyProgressOnPercentage(journeyProgress: {\n      key: \"what_do_you_really_believe_step_1_percentage\",\n      item_type: PERCENTAGE\n      question_number:1,\n      percentage_number: 20\n  }) {\n    id\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "37118285-59fc5967-5580-4b2c-9d08-f1cfd9984db0"
+		},
+		{
+			"name": "personality_assessment",
+			"item": [
+				{
+					"name": "lv_login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response body",
+									"let jsonData = pm.response.json();",
+									"",
+									"// Navigate the nested structure to get the access token",
+									"let accessToken = jsonData.data?.userLogin?.access_token;",
+									"",
+									"if (accessToken) {",
+									"    // Save to collection variable",
+									"    pm.environment.set(\"lvAccessToken\", accessToken);",
+									"    console.log(\"✅ lvAccessToken saved:\", accessToken);",
+									"} else {",
+									"    console.error(\"❌ access_token not found in response.\");",
+									"    pm.test(\"Access token should exist\", function () {",
+									"        pm.expect(accessToken, \"Expected access_token to be present\").to.not.be.undefined;",
+									"    });",
+									"}",
+									"",
+									"// save user_id as a collection variable",
+									"pm.collectionVariables.set(\"user_id\", jsonData.data.userLogin.user_id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "67a2f3c2-31ca-40b6-ac9b-ee00ea093591"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "204ca94c-28e7-4dc9-bfec-73d48e917643"
+							}
+						}
+					],
+					"id": "37118285-bf38a026-ad5f-4633-b968-a5714de4f2bc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation loginMutation($email: String, $password: String) {\n  userLogin(email: $email, password: $password) {\n    access_token\n    expires_at\n    email_verified_at\n    user_id\n    __typename\n  }\n}",
+								"variables": "{\n  \"email\": \"ahmad.yahea+37303@educatly.com\",\n  \"password\": \"Educatly1234@\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Personality Feedback",
+					"id": "37118285-0985f5bb-fd68-4626-b8fb-80d75c17303c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query userJourneyProgresses {\n    userJourneyProgresses(key: \"personality-assessment-quiz-1\") {\n      id\n      other_text\n      percentage_number\n      submission {\n        ... on JourneyQuestionOptionType {\n          id\n          title\n          option_number\n        }\n      }\n      submitted_on {\n        ... on JourneyQuestionType {\n          id\n          title\n          question_number\n        }\n      }\n    }\n  }",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Answer Personality Assessment Question 5",
+					"id": "37118285-f4018ee8-f83c-4e5f-a451-fdc1f7d0791c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"query\": \"\\n        mutation {\\n          addJourneyProgressOnQuestion(\\n            journeyProgress: {\\n              key: \\\"personality-assessment-quiz-1\\\",\\n              item_type: SINGLE_MCQ,\\n              question_number: 5,\\n              option_number: 1\\n            }\\n          ) {\\n            id\\n          }\\n        }\\n        \"}"
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Answer Personality Assessment Question 7",
+					"id": "37118285-17d76c55-a3a5-4463-9a9b-14488c69a6e0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"query\": \"\\n        mutation {\\n          addJourneyProgressOnQuestion(\\n            journeyProgress: {\\n              key: \\\"personality-assessment-quiz-1\\\",\\n              item_type: SINGLE_MCQ,\\n              question_number: 7,\\n              option_number: 1\\n            }\\n          ) {\\n            id\\n          }\\n        }\\n        \"}"
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Matching Profiles Based on Assessment",
+					"id": "37118285-2b870d41-ebbc-481d-a486-242a18f75fcc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"query\": \"\\n        query {\\n          successfulProfilesForPersonalityAssessment {\\n            id\\n            name\\n          }\\n        }\\n        \"}"
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Career, Passion, and Major Matches",
+					"id": "37118285-6ff13d85-0168-41e6-86ec-a4f6a06cc9e0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"query\": \"\\n        query {\\n          matchedOutcomesForPersonalityAssessment {\\n            passions {\\n              id\\n              name\\n              icon\\n            }\\n            educational_majors {\\n              id\\n              name\\n            }\\n            careers {\\n              id\\n              name\\n              icon\\n            }\\n          }\\n        }\\n        \"}"
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "37118285-b4a70b2d-668d-4f99-add9-4a65a374739f"
+		},
+		{
+			"name": "checkpoint_using_id",
+			"item": [
+				{
+					"name": "inviteStudentsByEmail",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a random number to append to the email",
+									"const randomValue = Math.floor(Math.random() * 100000);",
+									"const uniqueEmail = `ahmad.yahea+${randomValue}@educatly.com`;",
+									"",
+									"// Save unique email",
+									"pm.environment.set(\"userEmail\", uniqueEmail);",
+									"",
+									"// Function to generate a random phone number",
+									"function generateRandomPhoneNumber() {",
+									"    const prefixes = [\"+2010\", \"+2011\", \"+2012\", \"+2015\"];",
+									"    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];",
+									"    let number = '';",
+									"    for (let i = 0; i < 8; i++) {",
+									"        number += Math.floor(Math.random() * 10);",
+									"    }",
+									"    return prefix + number;",
+									"}",
+									"",
+									"// Save random phone number",
+									"const randomPhoneNumber = generateRandomPhoneNumber();",
+									"pm.environment.set(\"userPhoneNumber\", randomPhoneNumber);",
+									"",
+									"// Load faker and generate first/last name",
+									"pm.sendRequest('https://cdn.jsdelivr.net/npm/faker@5.5.3/dist/faker.min.js', (err, res) => {",
+									"  if (!err) {",
+									"    eval(res.text());",
+									"    const userFirstName = faker.name.firstName();",
+									"    const userLastName = faker.name.lastName();",
+									"",
+									"    // Save them to environment",
+									"    pm.environment.set(\"first_name\", userFirstName);",
+									"    pm.environment.set(\"last_name\", userLastName);",
+									"  }",
+									"});",
+									"",
+									"// Generate FCM token",
+									"const fcmToken = 'fcm_' + Math.random().toString(36).substring(2, 15);",
+									"pm.environment.set(\"fcmToken\", fcmToken);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "5ed0a502-4578-4bd8-be6f-84a27b18b1c4"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "5fd89a5b-e6dc-4b4a-9edf-7f7c7cc266c1"
+							}
+						}
+					],
+					"id": "37118285-ead4a1d7-c21a-4bbb-aa36-d4c8cc075222",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{paLoginToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation inviteStudentsByEmail($students: [HighSchoolStudentInvitationInput!]!) {\n  inviteStudentsByEmail(students: $students)\n}",
+								"variables": "{\n  \"students\": [\n    {\n      \"firstName\": \"{{first_name}}\",\n      \"lastName\": \"{{last_name}}\",\n      \"email\": \"{{userEmail}}\",\n      \"phone\": \"+20\",\n      \"subscribe\": true\n    }\n  ]\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Function to generate a random phone number",
+									"function generateRandomPhoneNumber() {",
+									"    const prefixes = [\"+2010\", \"+2011\", \"+2012\", \"+2015\"];",
+									"    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];",
+									"    let number = '';",
+									"    for (let i = 0; i < 8; i++) {",
+									"        number += Math.floor(Math.random() * 10);",
+									"    }",
+									"    return prefix + number;",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "3bb8d765-1099-4bc2-9e8b-d91ba298a3a7"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response once",
+									"var jsonData;",
+									"try {",
+									"    jsonData = pm.response.json();",
+									"} catch (e) {",
+									"    console.error(\"❌ Response is not valid JSON:\", e);",
+									"}",
+									"",
+									"// If signup data exists",
+									"if (jsonData?.data?.educatlyAppSignUp) {",
+									"    // Save userId",
+									"    const userId = jsonData.data.educatlyAppSignUp.currentUser?.id || jsonData.data.educatlyAppSignUp.user_id;",
+									"    pm.environment.set(\"invitationSignupUserId\", userId);",
+									"    console.log(\"✅ invitationSignupUserId set to:\", userId);",
+									"",
+									"    // Save token",
+									"    const token = jsonData.data.educatlyAppSignUp.access_token;",
+									"    pm.environment.set(\"invitationSignupToken\", token);",
+									"    console.log(\"✅ invitationSignupToken set to:\", token);",
+									"} else {",
+									"    console.error(\"❌ Could not find educatlyAppSignUp in response\", jsonData);",
+									"}",
+									"",
+									"if (pm.response.code === 200) {",
+									"  const emailUsed = pm.variables.get(\"userEmail\");",
+									"  console.log(\"✅ Signup successful for:\", emailUsed);",
+									"  pm.test(\"Mutation succeeded\", function () {",
+									"    pm.expect(pm.response.json().data.educatlyAppSignUp).to.exist;",
+									"  });",
+									"} else {",
+									"  console.error(\"❌ Signup failed\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "045a661f-36b4-4a60-943e-acef9ce82d42"
+							}
+						}
+					],
+					"id": "37118285-400def6a-caf2-4f39-b8a7-0540064928c3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation educatlyAppSignUp(\n  $email: String!\n  $password: String!\n  $phoneNumber: String!,\n  $fcmRegistrationToken: String!\n) {\n  educatlyAppSignUp(\n    email: $email\n    password: $password\n    phoneNumber: $phoneNumber\n    fcmRegistrationToken: $fcmRegistrationToken\n  ) {\n    access_token\n    expires_at\n    user_id\n    email_verified_at\n    currentUser {\n      id\n      email\n      phone_number\n    }\n  }\n}",
+								"variables": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"Educatly1234@\",\n  \"phoneNumber\": \"{{userPhoneNumber}}\",\n  \"fcmRegistrationToken\": \"hXevOGtc0UDiHjGLwbhsz:APA91bGSoAgkKc7uQST0vlgsiS_vruoewPeJxQ5vzRMsBtzUrXZP4F_LvXcaMr_mgEqSCZH_RnJycBK2k_oMEiejZXTjVe3ilmWTun_LlkQtz-pK7l-tlgs\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_signup_update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"",
+									"if (jsonData.data && jsonData.data.userUpdate && jsonData.data.userUpdate.id) {",
+									"    let userId = jsonData.data.userUpdate.id;",
+									"    pm.collectionVariables.set(\"user_id\", userId);",
+									"    console.log(\"Collection variable user_id set to:\", userId);",
+									"} else {",
+									"    console.error(\"userUpdate.id not found in response\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "75bdfdaf-e6ff-47e6-90a0-599942f34115"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "cff86352-3bb0-4927-ae16-db75f75c06b7"
+							}
+						}
+					],
+					"id": "37118285-cf36d4d1-1aa4-4462-8c0f-5283db815d0c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{invitationSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation signupUserUpdate(\n  $first_name: String\n  $last_name: String\n) {\n  userUpdate(\n    user: { first_name: $first_name, last_name: $last_name }\n  ) {\n    id\n    first_name\n    last_name\n    canAccessEducatlyApp\n  }\n}",
+								"variables": "{\n    \"first_name\": \"{{first_name}}\",\n    \"last_name\": \"{{last_name}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HighSchoolQualificationUpdateOrCreate Copy",
+					"id": "37118285-e5b663ec-abf3-430b-b53b-d01a84858463",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{invitationSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation HighSchoolQualificationUpdateOrCreate(\n  $high_school_id: Int\n  $high_school_name: String!\n  $grade_id: Int!\n  $certification_type_id: Int!\n  $from_year: Int!\n  $graduation_year: Int!\n  $transcripts_file: [AttachmentInputType]\n) {\n  highSchoolQualificationUpdateOrCreate(\n    eq: {\n      high_school_id: $high_school_id\n      high_school_name: $high_school_name\n      grade_id: $grade_id\n      certification_type_id: $certification_type_id\n      from_year: $from_year\n      graduation_year: $graduation_year\n      transcripts_file: $transcripts_file\n    }\n  ) {\n    id\n    high_school_name\n    high_school {\n      id\n      name\n    }\n    from_year\n    graduation_year\n    grade {\n      id\n      name\n    }\n    certification_type {\n      id\n      name\n    }\n    country {\n      id\n      name\n    }\n  }\n}\n",
+								"variables": "{\n    \"high_school_id\": 7,\n   \"high_school_name\": \"Kazeako\",\n   \"grade_id\": 4990,\n   \"certification_type_id\": 4972,\n   \"from_year\": 2020,\n   \"graduation_year\": 2021,\n   \"transcripts_file\": null\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c75e95e2-ed13-4edd-93c1-f34027123a51",
+								"exec": [
+									"// Parse JSON response",
+									"let data = pm.response.json();",
+									"",
+									"// Extract values",
+									"let userId = data.data.userLogin.user_id;",
+									"let accessToken = data.data.userLogin.access_token;",
+									"",
+									"// Save as environment variables (or use pm.collectionVariables.set)",
+									"pm.environment.set(\"user_id\", userId);",
+									"pm.environment.set(\"lvAccessToken\", accessToken);",
+									"",
+									"// Print to Postman console",
+									"console.log(\"User ID:\", userId);",
+									"console.log(\"Access Token:\", accessToken);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "ac8a95b3-d0e3-45a1-a50c-679fb57454d3",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "37118285-2f73fb5e-ad14-4eb1-bd6d-93877643397b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation loginMutation($email: String, $password: String) {\n  userLogin(email: $email, password: $password) {\n    access_token\n    expires_at\n    email_verified_at\n    user_id\n    __typename\n  }\n}",
+								"variables": "{\n  \"email\": \"ahmad.yahea+64949@educatly.com\",\n  \"password\": \"Educatly1234@\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "checkpoint",
+					"id": "37118285-d3acc8a5-7174-46f7-a64e-e1fd117a3173",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\n  userGet(id: {{user_id}} ){\n    name\n    email\n    total_xp\n    premium\n     journey_checkpoint { \n      id\n      module_number \n      section_number \n      item_piece_number\n      item_number \n      question_number \n    }\n    user_building_blocks {\n        lv_tag {\n            id\n            name\n            # tag_type\n        }\n    }\n    # current_plan{\n    #     name\n    #     product_name\n    # }\n    # active_subscription{\n    #     id\n    #     name\n    #     start_date\n    #     end_date\n    #     status\n    # }\n    # userSubscriptions {\n    #     user_id\n    #     customer_name\n    #     active\n    #     auto_renew\n    #     created_at\n    #     end_date\n    #     expired\n    #     name\n    #     id\n    #     b2b\n    #     b2c\n    #     payment_method\n    #     start_date\n    #     status\n    #     stripe_subscription_id\n    #     suspend\n    #     updated_at\n    #     }\n    }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "iap_CurrentUser",
+					"id": "37118285-ff801776-4916-4c3a-8094-a6dc4c1effc3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "92b55f6121338b109399fbebcf9d36b4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": " query CurrentUser {\n      currentUser {\n        email\n        premium\n        current_plan {\n          name\n          amount\n          currency\n      \n        }\n        active_subscription {\n          processor\n          status\n        apple_subscription{\n          product_id\n        }\n          data\n        payment_method\n            start_date\n          end_date\n          b2c\n        }\n      }\n    }",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "37118285-1fdbe747-2c09-4889-b05e-48108d928292"
+		},
+		{
+			"name": "waitinglist",
+			"item": [
+				{
+					"name": "lv_signup Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a random number to append to the email",
+									"const randomValue = Math.floor(Math.random() * 100000);",
+									"const uniqueEmail = `ahmad.yahea+${randomValue}@educatly.com`;",
+									"",
+									"// Save unique email",
+									"pm.environment.set(\"userEmail\", uniqueEmail);",
+									"",
+									"// Function to generate a random phone number",
+									"function generateRandomPhoneNumber() {",
+									"    const prefixes = [\"+2010\", \"+2011\", \"+2012\", \"+2015\"];",
+									"    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];",
+									"    let number = '';",
+									"    for (let i = 0; i < 8; i++) {",
+									"        number += Math.floor(Math.random() * 10);",
+									"    }",
+									"    return prefix + number;",
+									"}",
+									"",
+									"// Save random phone number",
+									"const randomPhoneNumber = generateRandomPhoneNumber();",
+									"pm.environment.set(\"userPhoneNumber\", randomPhoneNumber);",
+									"",
+									"// Load faker and generate first/last name",
+									"pm.sendRequest('https://cdn.jsdelivr.net/npm/faker@5.5.3/dist/faker.min.js', (err, res) => {",
+									"  if (!err) {",
+									"    eval(res.text());",
+									"    const userFirstName = faker.name.firstName();",
+									"    const userLastName = faker.name.lastName();",
+									"",
+									"    // Save them to environment",
+									"    pm.environment.set(\"first_name\", userFirstName);",
+									"    pm.environment.set(\"last_name\", userLastName);",
+									"  }",
+									"});",
+									"",
+									"// Generate FCM token",
+									"const fcmToken = 'fcm_' + Math.random().toString(36).substring(2, 15);",
+									"pm.environment.set(\"fcmToken\", fcmToken);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "de79a6d3-d89a-4655-a8b6-1e4462ee46c2"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response once",
+									"var jsonData;",
+									"try {",
+									"    jsonData = pm.response.json();",
+									"} catch (e) {",
+									"    console.error(\"❌ Response is not valid JSON:\", e);",
+									"}",
+									"",
+									"// If signup data exists",
+									"if (jsonData?.data?.educatlyAppSignUp) {",
+									"    // Save userId",
+									"    const userId = jsonData.data.educatlyAppSignUp.currentUser?.id || jsonData.data.educatlyAppSignUp.user_id;",
+									"    pm.environment.set(\"invitationSignupUserId\", userId);",
+									"    console.log(\"✅ invitationSignupUserId set to:\", userId);",
+									"",
+									"    // Save token",
+									"    const token = jsonData.data.educatlyAppSignUp.access_token;",
+									"    pm.environment.set(\"invitationSignupToken\", token);",
+									"    console.log(\"✅ invitationSignupToken set to:\", token);",
+									"} else {",
+									"    console.error(\"❌ Could not find educatlyAppSignUp in response\", jsonData);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "596439d2-efa3-4d59-bd60-7690099cfb77"
+							}
+						}
+					],
+					"id": "37118285-b8b252d2-065a-4c32-9b7d-963a90904eb2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{lvSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation educatlyAppSignUp(\n  $email: String!\n  $password: String!\n  $phoneNumber: String!,\n  $fcmRegistrationToken: String!\n) {\n  educatlyAppSignUp(\n    email: $email\n    password: $password\n    phoneNumber: $phoneNumber\n    fcmRegistrationToken: $fcmRegistrationToken\n  ) {\n    access_token\n    expires_at\n    user_id\n    email_verified_at\n    currentUser {\n      id\n      email\n      phone_number\n    }\n  }\n}",
+								"variables": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"Educatly1234@\",\n  \"phoneNumber\": \"{{userPhoneNumber}}\",\n  \"fcmRegistrationToken\": \"hXevOGtc0UDiHjGLwbhsz:APA91bGSoAgkKc7uQST0vlgsiS_vruoewPeJxQ5vzRMsBtzUrXZP4F_LvXcaMr_mgEqSCZH_RnJycBK2k_oMEiejZXTjVe3ilmWTun_LlkQtz-pK7l-tlgs\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_signup_update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"",
+									"if (jsonData.data && jsonData.data.userUpdate && jsonData.data.userUpdate.id) {",
+									"    let userId = jsonData.data.userUpdate.id;",
+									"    pm.collectionVariables.set(\"user_id\", userId);",
+									"    console.log(\"Collection variable user_id set to:\", userId);",
+									"} else {",
+									"    console.error(\"userUpdate.id not found in response\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"id": "b0276eb9-c4c8-40e3-8009-18b38b8b81fa"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [],
+								"type": "text/javascript",
+								"id": "73842ab4-3e20-4801-bf7e-e57969bcfe27"
+							}
+						}
+					],
+					"id": "37118285-408b9d99-327c-4fb6-aadf-29a22a829e2c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{invitationSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation signupUserUpdate(\n  $first_name: String\n  $last_name: String\n) {\n  userUpdate(\n    user: { first_name: $first_name, last_name: $last_name }\n  ) {\n    id\n    first_name\n    last_name\n  }\n}",
+								"variables": "{\n    \"first_name\": \"{{first_name}}\",\n    \"last_name\": \"{{last_name}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HighSchoolQualificationUpdateOrCreate",
+					"id": "37118285-2674c7b6-fb3b-4e5f-80e6-fae77506d27e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{invitationSignupToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation HighSchoolQualificationUpdateOrCreate(\n  $high_school_id: Int\n  $high_school_name: String!\n  $grade_id: Int!\n  $certification_type_id: Int!\n  $from_year: Int!\n  $graduation_year: Int!\n  $transcripts_file: [AttachmentInputType]\n) {\n  highSchoolQualificationUpdateOrCreate(\n    eq: {\n      high_school_id: $high_school_id\n      high_school_name: $high_school_name\n      grade_id: $grade_id\n      certification_type_id: $certification_type_id\n      from_year: $from_year\n      graduation_year: $graduation_year\n      transcripts_file: $transcripts_file\n    }\n  ) {\n    id\n    high_school_name\n    high_school {\n      id\n      name\n    }\n    from_year\n    graduation_year\n    grade {\n      id\n      name\n    }\n    certification_type {\n      id\n      name\n    }\n    country {\n      id\n      name\n    }\n  }\n}",
+								"variables": "{\n    \"high_school_id\": 7,\n   \"high_school_name\": \"Kazeako\",\n   \"grade_id\": 4990,\n   \"certification_type_id\": 4972,\n   \"from_year\": 2020,\n   \"graduation_year\": 2021,\n   \"transcripts_file\": null\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lv_login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response body",
+									"let jsonData = pm.response.json();",
+									"",
+									"// Navigate the nested structure to get the access token",
+									"let accessToken = jsonData.data?.userLogin?.access_token;",
+									"",
+									"if (accessToken) {",
+									"    // Save to collection variable",
+									"    pm.environment.set(\"lvAccessToken\", accessToken);",
+									"    console.log(\"✅ lvAccessToken saved:\", accessToken);",
+									"} else {",
+									"    console.error(\"❌ access_token not found in response.\");",
+									"    pm.test(\"Access token should exist\", function () {",
+									"        pm.expect(accessToken, \"Expected access_token to be present\").to.not.be.undefined;",
+									"    });",
+									"}",
+									"",
+									"// save user_id as a collection variable",
+									"pm.collectionVariables.set(\"user_id\", jsonData.data.userLogin.user_id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "ed4deb26-c81a-4a91-bac2-cca814985832"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "c4a0e9dc-5a92-4fdc-9d78-17aa7a1f5592"
+							}
+						}
+					],
+					"id": "37118285-e9a284d5-fb6f-4f0a-b44d-0862297629fd",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation loginMutation($email: String, $password: String) {\n  userLogin(email: $email, password: $password) {\n    access_token\n    expires_at\n    email_verified_at\n    user_id\n    __typename\n  }\n}",
+								"variables": "{\n  \"email\": \"ahmad.yahea+44250@educatly.com\",\n  \"password\": \"Educatly1234@\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "userGet",
+					"id": "37118285-e71f1a5d-1e6d-4b34-bdb4-ab8a0aa63264",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "8879009caf8c68d2b0f8b75a24d7b802",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\n  userGet(id: 125573 ){\n    name\n    email\n    userSubscriptions{\n        id\n        status\n        auto_renew\n        amount_in_currency_unit\n        b2b\n        b2c\n    }\n\n\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "joinPremiumWaitlist",
+					"id": "37118285-4968af44-35b8-43db-a608-e7e098294893",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "2e965c87b46442e99ea10bda6a0b6cdb",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\n  joinPremiumWaitlist {\n    id\n    joined_at\n    rank\n    status\n  }\n}\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "37118285-5864c882-1787-4d0a-ba0d-e849a72f6050"
+		},
+		{
+			"name": "b2b_invitation",
+			"item": [],
+			"id": "37118285-118daf65-723b-4d5b-8df1-5755e86a70c8"
+		},
+		{
+			"name": "educational_assessment_feedback",
+			"item": [
+				{
+					"name": "lv_login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response body",
+									"let jsonData = pm.response.json();",
+									"",
+									"// Extract data safely",
+									"let accessToken = jsonData.data?.userLogin?.access_token;",
+									"let userId = jsonData.data?.userLogin?.user_id;",
+									"",
+									"// Save access token",
+									"if (accessToken) {",
+									"    pm.collectionVariables.set(\"assessmentFeedbackToken\", accessToken);",
+									"    console.log(\"✅ assessmentFeedbackToken saved:\", accessToken);",
+									"} else {",
+									"    console.error(\"❌ access_token not found in response.\");",
+									"    pm.test(\"Access token should exist\", function () {",
+									"        pm.expect(accessToken, \"Expected access_token to be present\").to.not.be.undefined;",
+									"    });",
+									"}",
+									"",
+									"// Save user ID",
+									"if (userId) {",
+									"    pm.collectionVariables.set(\"assessmentFeedbackId\", userId);",
+									"    console.log(\"✅ assessmentFeedbackId saved:\", userId);",
+									"} else {",
+									"    console.error(\"❌ user_id not found in response.\");",
+									"    pm.test(\"User ID should exist\", function () {",
+									"        pm.expect(userId, \"Expected user_id to be present\").to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "d8d6ee6d-9608-4075-af65-00da4ead3d00"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"id": "bbd9b553-e2ef-4cf5-b71c-6ec2968d648d"
+							}
+						}
+					],
+					"id": "37118285-5f94e792-d30d-4d4c-9def-154f4763c10a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation loginMutation($email: String, $password: String) {\n  userLogin(email: $email, password: $password) {\n    access_token\n    expires_at\n    email_verified_at\n    user_id\n    __typename\n  }\n}",
+								"variables": "{\n  \"email\": \"ahmad.yahea+54587@educatly.com\",\n  \"password\": \"Educatly1234@\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "educationalPathwayFeedback",
+					"id": "37118285-a2ac160c-440c-46cd-a37c-b2c466b1f132",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{assessmentFeedbackToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query{\n  educationalPathwayFeedback {\n    learning_style {\n      id\n      dominant_style\n      meaning_text\n      learning_preferences\n      learning_tools {\n        id\n        name\n        icon\n        category\n      }\n      suggested_educational_formats\n      suggested_learning_paths\n      suggested_majors\n      what_to_do_next\n      icon\n    }\n    multiple_intelligence {\n      id\n      name\n      description\n      icon\n    }\n  }\n}\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "checkpoint",
+					"id": "37118285-f41eeb25-3de4-4841-8075-02165489af30",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{assessmentFeedbackToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\n  userGet(id: {{assessmentFeedbackId}} ){\n    name\n    email\n    total_xp\n    premium\n     journey_checkpoint {\n      id\n      module_number \n      section_number \n      item_piece_number\n      item_number \n      question_number \n    }\n    current_plan{\n        name\n        product_name\n    }\n    active_subscription{\n        id\n        name\n        start_date\n        end_date\n        status\n    }\n    userSubscriptions {\n        user_id\n        customer_name\n        active\n        auto_renew\n        created_at\n        end_date\n        expired\n        name\n        id\n        b2b\n        b2c\n        payment_method\n        start_date\n        status\n        stripe_subscription_id\n        suspend\n        updated_at\n        }\n    }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://api.educatly.com/graphql",
+							"protocol": "https",
+							"host": [
+								"api",
+								"educatly",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "37118285-73a49c89-d19c-4950-9629-131bfbb4af73"
+		},
+		{
+			"name": "subscriptoin_status",
+			"id": "37118285-cdbf043f-21f9-4229-a78f-924feeaa013b",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{lvAccessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation EditUserSubscription($editUserSubscriptionId: Int!,    $userSubscription: UserSubscriptionInput!) {\n  editUserSubscription(id: $editUserSubscriptionId, user_subscription: $userSubscription) {\n    id\n    name\n    user_id\n  }\n}",
+						"variables": "{\n    \n    \"editUserSubscriptionId\": 58,\n    \"userSubscription\": \n    {\n        \"status\": \"expired\"\n    }\n}\n\n//  statuses :{active, cancelled, expired, suspended, past_due}"
+					}
+				},
+				"url": {
+					"raw": "https://api.educatly.com/graphql",
+					"protocol": "https",
+					"host": [
+						"api",
+						"educatly",
+						"com"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				],
+				"id": "9f915aef-d7e6-4275-93e0-13751b757fd6"
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				],
+				"id": "4949db09-76e3-4c7d-8dcb-6b3eb2df1d9a"
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "lvAccessToken",
+			"value": "7e1635331648822b6a1df7adf752c634",
+			"type": "default"
+		},
+		{
+			"key": "ms",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "assessmentFeedbackToken",
+			"value": ""
+		},
+		{
+			"key": "assessmentFeedbackId",
+			"value": ""
+		},
+		{
+			"key": "paLoginToken",
+			"value": ""
+		},
+		{
+			"key": "userEmail",
+			"value": ""
+		},
+		{
+			"key": "userPhoneNumber",
+			"value": ""
+		},
+		{
+			"key": "fcmToken",
+			"value": ""
+		},
+		{
+			"key": "first_name",
+			"value": ""
+		},
+		{
+			"key": "last_name",
+			"value": ""
+		}
+	]
+}
