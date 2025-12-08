@@ -1872,7 +1872,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation loginMutation($email: String, $password: String) {\n  userLogin(email: $email, password: $password) {\n    access_token\n    expires_at\n    email_verified_at\n    user_id\n    __typename\n  }\n}",
-								"variables": "{\n  \"email\": \"ahmad.yahea+53064@educatly.com\",\n  \"password\": \"Educatly1234@\"\n}"
+								"variables": "{\n  \"email\": \"ahmad.yahea+6247@educatly.com\",\n  \"password\": \"Educatly1234@\"\n}"
 							}
 						},
 						"url": {
