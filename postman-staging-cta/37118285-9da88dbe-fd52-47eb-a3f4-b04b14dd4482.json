@@ -356,7 +356,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation HighSchoolQualificationUpdateOrCreate(\n  $high_school_id: Int\n  $high_school_name: String!\n  $grade_id: Int!\n  $certification_type_id: Int!\n  $from_year: Int!\n  $graduation_year: Int!\n  $transcripts_file: [AttachmentInputType]\n) {\n  highSchoolQualificationUpdateOrCreate(\n    eq: {\n      high_school_id: $high_school_id\n      high_school_name: $high_school_name\n      grade_id: $grade_id\n      certification_type_id: $certification_type_id\n      from_year: $from_year\n      graduation_year: $graduation_year\n      transcripts_file: $transcripts_file\n    }\n  ) {\n    id\n    high_school_name\n    high_school {\n      id\n      name\n    }\n    from_year\n    graduation_year\n    grade {\n      id\n      name\n    }\n    certification_type {\n      id\n      name\n    }\n    country {\n      id\n      name\n    }\n  }\n}\n",
-								"variables": "{\n    \"high_school_id\": 7,\n   \"high_school_name\": \"Kazeako\",\n   \"grade_id\": 4990,\n   \"certification_type_id\": 4972,\n   \"from_year\": 2020,\n   \"graduation_year\": 2021,\n   \"transcripts_file\": null\n}"
+								"variables": "{\n    \"high_school_id\": 162,\n   \"high_school_name\": \"Kazeako\",\n   \"grade_id\": 4990,\n   \"certification_type_id\": 4972,\n   \"from_year\": 2020,\n   \"graduation_year\": 2021,\n   \"transcripts_file\": null\n}"
 							}
 						},
 						"url": {
